@@ -1,4 +1,5 @@
 # Noema Power Card
+![Dashboard](one.png)
 
 Универсальная Lovelace-карта-конструктор для Home Assistant: LED-бары с неоновым свечением, «жидкий» шар с волнами, neumorphism-кнопки, вертикальные тумблеры и регуляторы.
 
