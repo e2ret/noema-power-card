@@ -30,6 +30,11 @@
 1. Скопировать `dist/noema-power-card.js` в `/config/www/`
 2. Настройки → Панели → ⋮ → Ресурсы → `/local/noema-power-card.js` (JavaScript-модуль)
 
+```yaml
+resources:
+  - url: /hacsfiles/noema-power-card/noema-power-card.js
+    type: module
+```
 ## Использование
 
 Добавить карточку → **Noema Power Card** → настроить через GUI или YAML:
