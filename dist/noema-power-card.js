@@ -1,5 +1,5 @@
 /* ============================================================
- * Noema Power Card — v3.20.4
+ * Noema Power Card — v1.0.0
  * Универсальная Lovelace-карта-конструктор: LED-бары и кнопки.
  * Без зависимостей. Настройка через GUI.
  *
@@ -13,7 +13,7 @@
  * https://github.com/e2ret/noema-power-card
  * ============================================================ */
 
-const NPC_VERSION = "3.20.4";
+const NPC_VERSION = "1.0.0";
 const NPC_SEGMENTS = 40;
 
 console.info(
