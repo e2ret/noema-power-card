@@ -1,4 +1,8 @@
+# ⚡ Noema Power Card
+
 ![Dashboard](one.png)
+
+🇺🇸 [English](README.md) • 🇷🇺 [Русский](README_RU.md)
 
 > **A modern all-in-one Lovelace dashboard card for Home Assistant.**
 >
