@@ -1,112 +1,59 @@
 # Noema Power Card
 ![Dashboard](one.png)
 
-Универсальная Lovelace-карта-конструктор для Home Assistant: LED-бары с неоновым свечением, «жидкий» шар с волнами, neumorphism-кнопки, вертикальные тумблеры и регуляторы.
+# Noema Power Card for Home Assistant
 
-Часть экосистемы **Noema** — проектов для умного дома от [e2ret](https://github.com/e2ret).
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/default)
+[![GitHub Release](https://img.shields.io/github/v/release/e2ret/noema-power-card)](https://github.com/e2ret/noema-power-card/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Самодостаточная: **не требует** card-mod, bar-card, mushroom или других зависимостей. Один JS-файл. Настройка через визуальный редактор.
+[🇬🇧 English](README.md) | [🇷🇺 Русская версия](README_RU.md)
 
-## Возможности
+A sleek, intuitive custom Lovelace card for Home Assistant designed to monitor and visualize real-time power distribution, grid import/export, solar generation, battery status, and household energy consumption.
 
-- **Конструктор без обязательных полей** — подходит для любых устройств
-- **LED-бары** с плавным градиентом, неоновым свечением и бегущим импульсом
-- **«Жидкий» шар** с вращающимися волнами, пульсацией при разряде и SVG-графиком истории
-- **Строка потока энергии** — «Работа от аккумулятора / Зарядка от сети» с бегущей кометой
-- **Neumorphism-кнопки** с вдавливанием при нажатии, выбором цвета
-- **Вертикальные тумблеры** с цветным фоном состояния
-- **Регуляторы** — неоновые слайдеры для number-сущностей
-- **Hero-блок** — картинка устройства рядом с шаром, за ними графики истории двух сенсоров
-- Разделители-секции, одна/две колонки, клик на ячейку → more-info
+---
 
-## Установка через HACS
+## 🌟 Features
 
-1. HACS → ⋮ → **Пользовательские репозитории**
-2. URL: `https://github.com/e2ret/noema-power-card`, категория: **Dashboard**
-3. Установить, Ctrl+Shift+R
+- ⚡ **Real-time Flow Visualization**: Clear graphical representation of energy moving between Solar, Grid, Battery, and Home.
+- 🎨 **Fully Customizable**: Flexible styling options, icons, color schemes, and conditional displays.
+- 📱 **Responsive Design**: Looks great on desktop, mobile devices, and wall-mounted tablets.
+- 🧩 **HACS Support**: Easy installation and automatic updates via Home Assistant Community Store.
 
-## Установка вручную
+---
 
-1. Скопировать `dist/noema-power-card.js` в `/config/www/`
-2. Настройки → Панели → ⋮ → Ресурсы → `/local/noema-power-card.js` (JavaScript-модуль)
+## 🚀 Installation
 
-```yaml
-resources:
-  - url: /hacsfiles/noema-power-card/noema-power-card.js
-    type: module
-```
-## Использование
+### Option 1: Via HACS (Recommended)
 
-Добавить карточку → **Noema Power Card** → настроить через GUI или YAML:
+1. Open **HACS** in your Home Assistant instance.
+2. Click on the three dots in the top right corner and select **Custom repositories**.
+3. Add Repository URL: `https://github.com/e2ret/noema-power-card`
+4. Category: **Dashboard** (or **Lovelace**).
+5. Click **Add**, find **Noema Power Card**, and click **Download**.
+6. Refresh your browser page.
+
+### Option 2: Manual Installation
+
+1. Download the `noema-power-card.js` file from the latest [Release](https://github.com/e2ret/noema-power-card/releases).
+2. Copy `noema-power-card.js` to your Home Assistant directory: `<config>/www/community/noema-power-card/noema-power-card.js`.
+3. Go to **Settings** -> **Dashboards** -> **Three dots (top right)** -> **Resources**.
+4. Add a new resource:
+   - **URL**: `/local/community/noema-power-card/noema-power-card.js`
+   - **Resource Type**: `JavaScript Module`
+
+---
+
+## ⚙️ Configuration
+
+Add the card to your dashboard via the UI or by adding the following YAML snippet:
 
 ```yaml
 type: custom:noema-power-card
-title: EcoFlow River 3 UPS
-image: /local/images/river3.png
-graph_entity_1: sensor.battery_level
-graph_entity_2: sensor.cell_temperature
-graph_hours: 24
-sensors:
-  - entity: sensor.battery_level
-    name: Аккумулятор
-    unit: "%"
-    style: liquid
-    wide: true
-    flow_in: sensor.battery_input_power
-    flow_out: sensor.battery_output_power
-  - entity: sensor.cell_temperature
-    name: Температура
-    unit: °C
-    color: heat
-    min: 15
-    max: 60
-    wide: true
-buttons:
-  - entity: button.proxmox_reboot
-    name: Перезагрузить
-    button_type: push
-    btn_color: yellow
-  - entity: button.proxmox_shutdown
-    name: Выключить
-    button_type: push
-    btn_color: red
-  - entity: switch.dc_12v_port
-    name: 12В
-controls:
-  - entity: number.battery_charge_limit_max
-    name: Лимит заряда
-    unit: "%"
-```
-
-### Параметры сенсора
-
-| Параметр | Описание |
-|---|---|
-| `entity` | Сущность |
-| `name` | Подпись |
-| `unit` | Единица |
-| `style` | `bar` или `liquid` (шар) |
-| `color` | `level`, `heat`, `good`, `warn`, `bad`, `info` |
-| `min` / `max` | Шкала |
-| `wide` | На всю ширину |
-| `invert` | Инверсия градиента |
-| `animate` | Бегущий импульс (вкл по умолчанию) |
-| `flow_in` / `flow_out` | Сенсоры потока для шара и строки статуса |
-
-### Параметры кнопки
-
-| Параметр | Описание |
-|---|---|
-| `entity` | switch / button / script |
-| `name` | Подпись |
-| `button_type` | `toggle` (тумблер) или `push` (кнопка) |
-| `btn_color` | `cyan`, `red`, `yellow`, `green`, `blue` |
-| `confirm` | Попап подтверждения |
-
-## Совместимость
-
-EcoFlow BLE, ecoflow-cloud, NUT, Proxmox, ESPHome и любые интеграции с числовыми сенсорами.
-
-## Лицензия
-
-MIT
+title: "Power Distribution"
+entities:
+  grid_power: sensor.grid_power
+  solar_power: sensor.solar_power
+  battery_power: sensor.battery_power
+  battery_soc: sensor.battery_state_of_charge
+  home_power: sensor.house_consumption
