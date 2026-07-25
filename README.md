@@ -213,14 +213,6 @@ Works with virtually any integration exposing numeric sensors, including:
 
 ---
 
-## 🖼️ Screenshots
-
-| Dashboard | Controls |
-|-----------|----------|
-| ![](one.png) | *(Add another screenshot here)* |
-
----
-
 ## 💡 Use Cases
 
 Perfect for monitoring:
