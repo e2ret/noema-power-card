@@ -1,10 +1,8 @@
 # ⚡ Noema Power Card
 
 <p align="center">
-  <img src="one.png" width="700">
+  <img src="one.png" width="300">
 </p>
-
-![Dashboard](one.png)
 
 🇺🇸 [English](README.md) • 🇷🇺 [Русский](README_RU.md)
 
