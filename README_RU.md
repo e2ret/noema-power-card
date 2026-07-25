@@ -1,7 +1,7 @@
 # ⚡ Noema Power Card
 
 <p align="left">
-  <img src="one.png" width="300" alt="Noema Power Card">
+  <img src="01.png" width="300" alt="Noema Power Card">
 </p>
 
 🇷🇺 [Русский](README_RU.md) • 🇺🇸 [English](README.md)
@@ -210,14 +210,6 @@ controls:
 - 🏠 ESPHome
 - 📡 MQTT
 - ⚡ Любые числовые сущности Home Assistant
-
----
-
-## 🖼️ Скриншоты
-
-| Панель | Управление |
-|--------|------------|
-| ![](one.png) | *(Добавьте второй скриншот)* |
 
 ---
 
