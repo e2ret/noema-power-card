@@ -1,6 +1,6 @@
 # ⚡ Noema Power Card
 
-<p align="center">
+<p align="left">
   <img src="one.png" width="300">
 </p>
 
