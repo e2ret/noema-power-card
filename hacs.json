@@ -1,5 +1,6 @@
 {
   "name": "Noema Power Card",
+  "filename": "noema-power-card.js",
   "render_readme": true,
-  "filename": "noema-power-card.js"
+  "content_in_root": false
 }
