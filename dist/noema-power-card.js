@@ -1,17 +1,19 @@
 /* ============================================================
- * Noema Power Card — v1.1.0 (International Edition)
- * Universal Lovelace card constructor: LED bars & buttons.
- * Zero dependencies. GUI configuration.
+ * Noema Power Card — v3.20.4
+ * Универсальная Lovelace-карта-конструктор: LED-бары и кнопки.
+ * Без зависимостей. Настройка через GUI.
  *
- * v1.1.0:
- *  - Full i18n via Home Assistant language (en / ru)
- *  - All UI strings extracted (editor, status, dialogs)
- *  - Automatic language detection from hass.locale / hass.language
+ * v3.20.4:
+ *  - Никаких обязательных и предустановленных полей: только
+ *    название, картинка, список сенсоров и список кнопок
+ *  - Каждый сенсор: сущность, имя, единица, min/max, цвет,
+ *    знаки после запятой, анимация волны при активности
+ *  - Кнопки: switch/button/script, подтверждение по желанию
  *
  * https://github.com/e2ret/noema-power-card
  * ============================================================ */
 
-const NPC_VERSION = "1.1.0";
+const NPC_VERSION = "3.20.6";
 const NPC_SEGMENTS = 40;
 
 console.info(
@@ -20,191 +22,13 @@ console.info(
   "color: #0A6847; background: white; font-weight: 700;"
 );
 
-/* ------------------------------------------------------------------ */
-/*  Translations (embedded for single-file HACS distribution)         */
-/* ------------------------------------------------------------------ */
-
-const NPC_TRANSLATIONS = {
-  en: {
-    "card.name": "Noema Power Card",
-    "card.description": "Constructor: LED bars and buttons for any devices",
-    "status.no_data": "No data",
-    "status.charging": "Charging from AC",
-    "status.battery": "Running on battery",
-    "status.watts": "W",
-    "dialog.confirm": "Execute «{name}»?",
-    "dialog.confirm_generic": "Execute?",
-    "dialog.yes": "Yes",
-    "dialog.no": "No",
-    "editor.title": "Card title",
-    "editor.image": "Image (/local/...)",
-    "editor.graph_entity_1": "Graph 1 behind hero",
-    "editor.graph_entity_2": "Graph 2 behind hero",
-    "editor.graph_hours": "Period, hours",
-    "editor.background": "Card background",
-    "editor.background_color": "Background color (for “Custom color” mode)",
-    "editor.background_transparent": "Transparent (default)",
-    "editor.background_color_option": "Custom color",
-    "editor.sensors": "Sensors",
-    "editor.buttons": "Buttons",
-    "editor.controls": "Controls",
-    "editor.add_sensor": "＋ Add sensor",
-    "editor.add_divider": "＋ Divider",
-    "editor.add_button": "＋ Add button",
-    "editor.add_control": "＋ Add control",
-    "editor.delete": "✕ Delete",
-    "editor.move_up": "↑",
-    "editor.move_down": "↓",
-    "editor.sensor": "Sensor",
-    "editor.button": "Button",
-    "editor.control": "Control",
-    "editor.divider": "Divider",
-    "editor.divider_named": "— Divider: {name}",
-    "editor.entity": "Entity",
-    "editor.name": "Name",
-    "editor.unit": "Unit of measurement",
-    "editor.color": "Bar color",
-    "editor.min": "Scale minimum",
-    "editor.max": "Scale maximum",
-    "editor.decimals": "Decimal places",
-    "editor.flow_in": "Input sensor, W (for ball pulse)",
-    "editor.flow_out": "Output sensor, W (for ball pulse)",
-    "editor.style": "Display style",
-    "editor.style_bar": "Bar (LED segments)",
-    "editor.style_liquid": "Liquid (tank with waves)",
-    "editor.wide": "Full width (single column)",
-    "editor.invert": "Invert: gradient and spark direction",
-    "editor.animate": "Running spark when active (on by default)",
-    "editor.btn_color": "Button color",
-    "editor.btn_color_cyan": "Cyan (default)",
-    "editor.btn_color_red": "Red (dangerous action)",
-    "editor.btn_color_yellow": "Yellow (caution)",
-    "editor.btn_color_green": "Green (safe)",
-    "editor.btn_color_blue": "Blue (info)",
-    "editor.button_type": "Type: Toggle or Push",
-    "editor.button_type_toggle": "Toggle (switch)",
-    "editor.button_type_push": "Push (button)",
-    "editor.confirm": "Ask for confirmation",
-    "editor.step": "Control step",
-    "editor.color_level": "Gradient red→green",
-    "editor.color_heat": "Gradient green→red",
-    "editor.color_good": "Green",
-    "editor.color_warn": "Yellow",
-    "editor.color_bad": "Red",
-    "editor.color_info": "Blue",
-  },
-  ru: {
-    "card.name": "Noema Power Card",
-    "card.description": "Конструктор: LED-бары и кнопки для любых устройств",
-    "status.no_data": "нет данных",
-    "status.charging": "Зарядка от сети",
-    "status.battery": "Работа от аккумулятора",
-    "status.watts": "Вт",
-    "dialog.confirm": "Выполнить «{name}»?",
-    "dialog.confirm_generic": "Выполнить?",
-    "dialog.yes": "Да",
-    "dialog.no": "Нет",
-    "editor.title": "Название карточки",
-    "editor.image": "Картинка (/local/...)",
-    "editor.graph_entity_1": "График 1 за hero-блоком",
-    "editor.graph_entity_2": "График 2 за hero-блоком",
-    "editor.graph_hours": "Период, часов",
-    "editor.background": "Фон карточки",
-    "editor.background_color": "Цвет фона (для режима «Свой цвет»)",
-    "editor.background_transparent": "Прозрачный (по умолчанию)",
-    "editor.background_color_option": "Свой цвет",
-    "editor.sensors": "Сенсоры",
-    "editor.buttons": "Кнопки",
-    "editor.controls": "Регуляторы",
-    "editor.add_sensor": "＋ Добавить сенсор",
-    "editor.add_divider": "＋ Разделитель",
-    "editor.add_button": "＋ Добавить кнопку",
-    "editor.add_control": "＋ Добавить регулятор",
-    "editor.delete": "✕ Удалить",
-    "editor.move_up": "↑",
-    "editor.move_down": "↓",
-    "editor.sensor": "Сенсор",
-    "editor.button": "Кнопка",
-    "editor.control": "Регулятор",
-    "editor.divider": "Разделитель",
-    "editor.divider_named": "— Разделитель: {name}",
-    "editor.entity": "Сущность",
-    "editor.name": "Название",
-    "editor.unit": "Единица измерения",
-    "editor.color": "Цвет полосы",
-    "editor.min": "Минимум шкалы",
-    "editor.max": "Максимум шкалы",
-    "editor.decimals": "Знаков после запятой",
-    "editor.flow_in": "Сенсор входа, Вт (для пульса шара)",
-    "editor.flow_out": "Сенсор выхода, Вт (для пульса шара)",
-    "editor.style": "Вид отображения",
-    "editor.style_bar": "Полоса (LED-сегменты)",
-    "editor.style_liquid": "Жидкость (бак с волнами)",
-    "editor.wide": "На всю ширину (одна колонка)",
-    "editor.invert": "Инверсия: градиент и направление искры",
-    "editor.animate": "Бегущая искра при активности (по умолчанию вкл)",
-    "editor.btn_color": "Цвет кнопки",
-    "editor.btn_color_cyan": "Голубой (по умолчанию)",
-    "editor.btn_color_red": "Красный (опасное действие)",
-    "editor.btn_color_yellow": "Жёлтый (осторожно)",
-    "editor.btn_color_green": "Зелёный (безопасное)",
-    "editor.btn_color_blue": "Синий (информация)",
-    "editor.button_type": "Тип: Тумблер или Кнопка",
-    "editor.button_type_toggle": "Тумблер (switch)",
-    "editor.button_type_push": "Кнопка (button)",
-    "editor.confirm": "Спрашивать подтверждение",
-    "editor.step": "Шаг регулятора",
-    "editor.color_level": "Градиент красный→зелёный",
-    "editor.color_heat": "Градиент зелёный→красный",
-    "editor.color_good": "Зелёный",
-    "editor.color_warn": "Жёлтый",
-    "editor.color_bad": "Красный",
-    "editor.color_info": "Синий",
-  },
-};
-
-/**
- * Resolve language from Home Assistant hass object.
- * Falls back to "en".
- */
-function npcLang(hass) {
-  if (!hass) return "en";
-  const lang =
-    (hass.locale && hass.locale.language) ||
-    hass.language ||
-    (hass.user && hass.user.language) ||
-    "en";
-  const short = String(lang).toLowerCase().split("-")[0];
-  return NPC_TRANSLATIONS[short] ? short : "en";
-}
-
-/**
- * Translate a key. Supports simple {placeholder} substitution.
- * Usage: this.t("status.charging") or this.t("dialog.confirm", { name: "Foo" })
- */
-function npcT(hass, key, vars) {
-  const dict = NPC_TRANSLATIONS[npcLang(hass)] || NPC_TRANSLATIONS.en;
-  let str = dict[key] ?? NPC_TRANSLATIONS.en[key] ?? key;
-  if (vars) {
-    for (const [k, v] of Object.entries(vars)) {
-      str = str.replace(new RegExp(`\\{${k}\\}`, "g"), String(v));
-    }
-  }
-  return str;
-}
-
-/* ------------------------------------------------------------------ */
-/*  Color utilities (unchanged)                                       */
-/* ------------------------------------------------------------------ */
-
+/* плавная интерполяция цвета между опорными точками градиента */
 function npcLerp(stops, t) {
   t = Math.max(0, Math.min(1, t));
-  let a = stops[0],
-    b = stops[stops.length - 1];
+  let a = stops[0], b = stops[stops.length - 1];
   for (let k = 0; k < stops.length - 1; k++) {
     if (t >= stops[k][0] && t <= stops[k + 1][0]) {
-      a = stops[k];
-      b = stops[k + 1];
+      a = stops[k]; b = stops[k + 1];
       break;
     }
   }
@@ -249,10 +73,6 @@ const NPC_PALETTES = {
   info: () => "#3b9df3",
 };
 
-/* ------------------------------------------------------------------ */
-/*  Card                                                                */
-/* ------------------------------------------------------------------ */
-
 class NoemaPowerCard extends HTMLElement {
   static getConfigElement() {
     return document.createElement("noema-power-card-editor");
@@ -279,11 +99,6 @@ class NoemaPowerCard extends HTMLElement {
     this._update();
   }
 
-  /** Shortcut used throughout the card */
-  t(key, vars) {
-    return npcT(this._hass, key, vars);
-  }
-
   _num(entityId) {
     if (!entityId) return null;
     const st = this._hass.states[entityId];
@@ -300,19 +115,29 @@ class NoemaPowerCard extends HTMLElement {
 
   _build() {
     const c = this._config;
-    const t = (k, v) => this.t(k, v);
 
-    const heroLiquid = (c.sensors || []).some((s) => s.style === "liquid" && s.wide);
-    const headHtml =
-      c.title || c.image
-        ? c.image && !heroLiquid
-          ? `<div class="efc-head">
-             <img class="efc-head-img" src="${c.image}" alt="">
-             <div class="efc-title">${c.title || ""}</div>
-             <div class="efc-head-spacer"></div>
+    const heroLiquid = (c.sensors || []).some(
+      (s) => s.style === "liquid" && s.wide
+    );
+    const hasGraph = c.graph_entity_1 || c.graph_entity_2;
+    const graphSvgHead = hasGraph && !heroLiquid
+      ? `<svg id="hgraph" viewBox="0 0 400 130" preserveAspectRatio="none"
+           style="position:absolute;left:0;right:0;top:-12px;bottom:-12px;height:calc(100% + 24px);width:100%;pointer-events:none;opacity:0.4;z-index:0;">
+           <path id="hg1" fill="none" stroke="rgba(79,201,91,0.8)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+           <path id="hg2" fill="none" stroke="rgba(59,157,243,0.7)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+         </svg>`
+      : "";
+    const headHtml = c.title || c.image
+      ? c.image && !heroLiquid
+        ? `<div style="position:relative;padding:4px 0;">
+             ${graphSvgHead}
+             <div class="efc-head" style="position:relative;z-index:1;justify-content:center;gap:16px;">
+               <img class="efc-head-img" src="${c.image}" alt="" style="flex:0 0 auto;">
+               <div class="efc-title" style="flex:0 1 auto;text-align:left;font-size:clamp(16px,4vw,26px);">${c.title || ""}</div>
+             </div>
            </div>`
-          : `<div class="efc-head"><div class="efc-title">${c.title || ""}</div></div>`
-        : "";
+        : `<div class="efc-head"><div class="efc-title">${c.title || ""}</div></div>`
+      : "";
 
     const sensorsHtml = (c.sensors || [])
       .map((s, i) => {
@@ -333,6 +158,7 @@ class NoemaPowerCard extends HTMLElement {
               </div>
             </div>
           </div>`;
+          const liquidEntity = s.entity || "";
 
           const statusHtml =
             s.flow_in || s.flow_out
@@ -383,6 +209,21 @@ class NoemaPowerCard extends HTMLElement {
             <span class="efc-ctl-val" id="ctlv-${i}">—</span>
           </div>`
       )
+      .join("");
+
+    const buttonsHtml = (c.buttons || [])
+      .map((b, i) => {
+        const isPush = b.button_type === "push" ||
+          (b.entity && b.entity.split(".")[0] === "button");
+        if (isPush) {
+          const bc = b.btn_color || "cyan";
+          return `<div class="efc-pushwrap"><button class="efc-push" id="btn-${i}" tabindex="0" data-color="${bc}">${b.name || b.entity || ""}</button></div>`;
+        }
+        return `<div class="efc-tglwrap">
+             <div class="efc-tgl" id="btn-${i}" role="switch" tabindex="0" aria-label="${b.name || b.entity || ""}"><i></i></div>
+             <span class="efc-tgllbl">${b.name || b.entity || ""}</span>
+           </div>`;
+      })
       .join("");
 
     const bgMode = c.background === "color" ? "color" : "transparent";
@@ -451,6 +292,7 @@ class NoemaPowerCard extends HTMLElement {
           .efc-liq-wrap[data-entity]:hover {
             filter: brightness(1.08);
           }
+          /* картинка станции рядом с шаром заряда */
           .efc-hero {
             display: flex;
             align-items: center;
@@ -458,6 +300,7 @@ class NoemaPowerCard extends HTMLElement {
             gap: 28px;
             padding: 4px 0;
           }
+          /* внутри hero авто-поля шара отключаем — пара центрируется флексом */
           .efc-hero .efc-liq-wrap { margin: 0; }
           .efc-hero-img {
             height: 115px;
@@ -467,16 +310,19 @@ class NoemaPowerCard extends HTMLElement {
           }
           @media (max-width: 420px) {
             .efc-hero { gap: 14px; }
-            .efc-hero .efc-liq-wrap { margin: 0; }
-            .efc-hero-img { height: 96px; }
+            /* внутри hero авто-поля шара отключаем — пара центрируется флексом */
+          .efc-hero .efc-liq-wrap { margin: 0; }
+          .efc-hero-img { height: 96px; }
           }
 
+          /* ---- жидкий шар как в приложении EcoFlow ---- */
           .efc-liq-wrap {
             position: relative;
             width: 115px;
             height: 115px;
             margin: 6px auto;
             border-radius: 50%;
+            /* неоновое свечение цветом жидкости */
             box-shadow: 0 0 8px var(--liq-cl, transparent),
                         0 0 18px var(--liq-cl, transparent);
             transition: box-shadow .8s ease;
@@ -491,6 +337,7 @@ class NoemaPowerCard extends HTMLElement {
             background: var(--liq-bg, rgba(255,255,255,0.06));
             border: 1px solid var(--liq-cl, rgba(255,255,255,0.10));
           }
+          /* вода: контейнер уровня */
           .efc-liq-fill {
             position: absolute;
             left: 0; right: 0; bottom: 0;
@@ -498,6 +345,7 @@ class NoemaPowerCard extends HTMLElement {
             background: var(--liq-c, #2a86a0);
             transition: height .8s ease, background .8s ease;
           }
+          /* волна: большой медленно вращающийся эллипс над водой */
           .efc-liq::before {
             content: "";
             position: absolute;
@@ -512,6 +360,7 @@ class NoemaPowerCard extends HTMLElement {
             animation: efc-liqspin 9s linear infinite;
             pointer-events: none;
           }
+          /* вторая волна: полупрозрачная, чуть выше, в противофазе */
           .efc-liq::after {
             content: "";
             position: absolute;
@@ -531,6 +380,7 @@ class NoemaPowerCard extends HTMLElement {
             from { transform: rotate(0deg); }
             to   { transform: rotate(360deg); }
           }
+          /* работа от батареи: дыхание свечения шара */
           .efc-liq-wrap.discharge {
             animation: efc-liqpulse 2.4s ease-in-out infinite;
           }
@@ -544,11 +394,13 @@ class NoemaPowerCard extends HTMLElement {
                           0 0 52px var(--liq-cl, transparent);
             }
           }
+          /* зарядка: усиленное ровное свечение шара */
           .efc-liq-wrap.charge {
             box-shadow: 0 0 16px var(--liq-cl, transparent),
                         0 0 40px var(--liq-cl, transparent);
           }
 
+          /* статусная строка потока энергии */
           .efc-flowstatus {
             grid-column: 1 / -1;
             display: flex;
@@ -585,6 +437,7 @@ class NoemaPowerCard extends HTMLElement {
             box-shadow: inset 0 0 24px rgba(59, 157, 243, 0.12),
                         0 0 14px rgba(59, 157, 243, 0.14);
           }
+          /* вспышка при смене режима */
           .efc-flowstatus.switch {
             animation: efc-modeflash .7s ease;
           }
@@ -605,6 +458,7 @@ class NoemaPowerCard extends HTMLElement {
             flex: 0 0 auto;
             white-space: nowrap;
           }
+          /* бегущий поток энергии: линия со скользящими частицами */
           .efc-fs-line {
             flex: 1;
             height: 3px;
@@ -622,6 +476,7 @@ class NoemaPowerCard extends HTMLElement {
             height: 3px;
             margin-top: -1.5px;
             border-radius: 2px;
+            /* одиночная комета: яркая голова, тающий хвост */
             background: linear-gradient(90deg,
               transparent 0%,
               var(--fs-cl, rgba(79,201,91,.4)) 55%,
@@ -714,12 +569,17 @@ class NoemaPowerCard extends HTMLElement {
           }
           .efc-led i.on {
             opacity: 1;
+            /* неоновое свечение цветом сегмента */
             box-shadow: 0 0 4px var(--efc-seg), 0 0 9px var(--efc-seg);
           }
+          /* бегущая искра: короткий импульс яркости пробегает по заполненной части */
           .efc-led.anim i.on {
+            /* один импульс на бар: длина волны (3.6/0.06 = 60 сегм) > 40 сегм бара,
+               остаток периода — пауза между пробегами */
             animation: efc-spark 3.6s linear infinite;
             animation-delay: calc(var(--i) * -0.06s);
           }
+          /* реверс: искра бежит в обратную сторону */
           .efc-led.anim.rev i.on {
             animation-delay: calc(var(--i) * 0.06s);
           }
@@ -741,6 +601,7 @@ class NoemaPowerCard extends HTMLElement {
             align-items: center;
             gap: 6px;
           }
+          /* вертикальный тумблер: пилюля 34x62, кноб ездит вверх-вниз */
           .efc-tgl {
             flex: 0 0 auto;
             width: 34px;
@@ -795,11 +656,13 @@ class NoemaPowerCard extends HTMLElement {
             line-height: 1.15;
           }
 
+          /* ---- кнопка push ---- */
           .efc-pushwrap {
             display: flex;
             flex-direction: column;
             align-items: center;
           }
+          /* neumorphism кнопки на тёмном фоне */
           .efc-push {
             width: 100%;
             height: 46px;
@@ -817,12 +680,14 @@ class NoemaPowerCard extends HTMLElement {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            /* рельеф: светлая тень сверху-слева, тёмная снизу-справа */
             box-shadow:
               4px 4px 10px rgba(0,0,0,0.45),
               -3px -3px 8px rgba(255,255,255,0.06),
               inset 0 1px 0 rgba(255,255,255,0.10);
             transition: box-shadow .12s ease, transform .08s ease, color .15s ease;
           }
+          /* цветовые варианты — только текст и внутреннее свечение */
           .efc-push[data-color="red"]    { --efc-btn-clr: #f47c72; --efc-btn-in: rgba(224,72,62,0.18); }
           .efc-push[data-color="yellow"] { --efc-btn-clr: #f3d43b; --efc-btn-in: rgba(243,212,59,0.15); }
           .efc-push[data-color="green"]  { --efc-btn-clr: #4fc95b; --efc-btn-in: rgba(79,201,91,0.15); }
@@ -837,6 +702,7 @@ class NoemaPowerCard extends HTMLElement {
               inset 0 0 18px var(--efc-btn-in, rgba(255,255,255,0.08));
             color: #fff;
           }
+          /* вдавливание при нажатии */
           .efc-push:active, .efc-push.pressed {
             transform: scale(0.97);
             box-shadow:
@@ -851,6 +717,7 @@ class NoemaPowerCard extends HTMLElement {
             outline-offset: 3px;
           }
 
+          /* ---- регуляторы ---- */
           .efc-ctls {
             display: flex;
             flex-direction: column;
@@ -960,38 +827,30 @@ class NoemaPowerCard extends HTMLElement {
         <div class="efc-wrap bg-${bgMode}" ${bgMode === "color" && bgColor ? `style="--efc-bg:${bgColor}"` : ""}>
           ${headHtml}
           ${sensorsHtml ? `<div class="efc-grid">${sensorsHtml}</div>` : ""}
-          ${(() => {
-            const pushHtml = (c.buttons || [])
-              .map((b, i) => {
-                const isPush =
-                  b.button_type === "push" ||
-                  (b.entity && b.entity.split(".")[0] === "button");
-                if (!isPush) return "";
-                const bc = b.btn_color || "cyan";
-                return `<div class="efc-pushwrap"><button class="efc-push" id="btn-${i}" tabindex="0" data-color="${bc}">${b.name || b.entity || ""}</button></div>`;
-              })
-              .join("");
-            const tglHtml = (c.buttons || [])
-              .map((b, i) => {
-                const isPush =
-                  b.button_type === "push" ||
-                  (b.entity && b.entity.split(".")[0] === "button");
-                if (isPush) return "";
-                return `<div class="efc-tglwrap"><div class="efc-tgl" id="btn-${i}" role="switch" tabindex="0" aria-label="${b.name || b.entity || ""}"><i></i></div><span class="efc-tgllbl">${b.name || b.entity || ""}</span></div>`;
-              })
-              .join("");
-            return (
-              (pushHtml ? `<div class="efc-btns efc-btns-push">${pushHtml}</div>` : "") +
-              (tglHtml ? `<div class="efc-btns efc-btns-tgl">${tglHtml}</div>` : "")
-            );
+          ${(()=>{
+            const pushItems = (c.buttons||[]).filter((b,i)=>b.button_type==='push'||(b.entity&&b.entity.split('.')[0]==='button'));
+            const tglItems = (c.buttons||[]).filter((b,i)=>!(b.button_type==='push'||(b.entity&&b.entity.split('.')[0]==='button')));
+            const pushHtml = (c.buttons||[]).map((b,i)=>{
+              const isPush=b.button_type==='push'||(b.entity&&b.entity.split('.')[0]==='button');
+              if(!isPush) return '';
+              const bc=b.btn_color||'cyan';
+              return `<div class="efc-pushwrap"><button class="efc-push" id="btn-${i}" tabindex="0" data-color="${bc}">${b.name||b.entity||''}</button></div>`;
+            }).join('');
+            const tglHtml = (c.buttons||[]).map((b,i)=>{
+              const isPush=b.button_type==='push'||(b.entity&&b.entity.split('.')[0]==='button');
+              if(isPush) return '';
+              return `<div class="efc-tglwrap"><div class="efc-tgl" id="btn-${i}" role="switch" tabindex="0" aria-label="${b.name||b.entity||''}"><i></i></div><span class="efc-tgllbl">${b.name||b.entity||''}</span></div>`;
+            }).join('');
+            return (pushHtml?`<div class="efc-btns efc-btns-push">${pushHtml}</div>`:'')+
+                   (tglHtml?`<div class="efc-btns efc-btns-tgl">${tglHtml}</div>`:'');
           })()}
           ${controlsHtml ? `<div class="efc-ctls">${controlsHtml}</div>` : ""}
 
           <div class="efc-confirm" id="efc-confirm">
-            <b id="efc-confirm-text">${t("dialog.confirm_generic")}</b>
+            <b id="efc-confirm-text">Выполнить?</b>
             <div class="efc-cbtns">
-              <button class="efc-yes" id="efc-yes">${t("dialog.yes")}</button>
-              <button class="efc-no" id="efc-no">${t("dialog.no")}</button>
+              <button class="efc-yes" id="efc-yes">Да</button>
+              <button class="efc-no" id="efc-no">Нет</button>
             </div>
           </div>
         </div>
@@ -1018,6 +877,7 @@ class NoemaPowerCard extends HTMLElement {
       this._pendingPush = null;
     });
 
+    /* SVG-графики за hero-блоком: обновляем раз в 5 минут */
     if (c.graph_entity_1 || c.graph_entity_2) {
       const now = Date.now();
       if (!this._graphTs || now - this._graphTs > 300000) {
@@ -1025,54 +885,46 @@ class NoemaPowerCard extends HTMLElement {
         const hours = c.graph_hours || 24;
         const from = new Date(now - hours * 3600000).toISOString();
         const entities = [c.graph_entity_1, c.graph_entity_2].filter(Boolean);
-        this._hass
-          .callApi(
-            "GET",
-            `history/period/${from}?filter_entity_id=${entities.join(",")}&minimal_response=true&no_attributes=true`
-          )
-          .then((data) => {
-            const drawPath = (id, arr) => {
-              const el = this.querySelector("#" + id);
-              if (!el || !arr || arr.length < 2) return;
-              const raw = arr.map((s) => parseFloat(s.state)).filter((v) => !isNaN(v));
-              if (raw.length < 2) return;
-              const step = Math.max(1, Math.floor(raw.length / 80));
-              const vals = raw.filter((_, i) => i % step === 0);
-              const mn = Math.min(...vals),
-                mx = Math.max(...vals),
-                rng = mx - mn || 1;
-              const W = 400,
-                H = 130,
-                p = 14;
-              const pts = vals.map((v, i) => ({
-                x: p + (i / (vals.length - 1)) * (W - p * 2),
-                y: H - p - ((v - mn) / rng) * (H - p * 2),
-              }));
-              let d = `M${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)}`;
-              for (let i = 1; i < pts.length; i++) {
-                const cp = (pts[i - 1].x + pts[i].x) / 2;
-                d += ` C${cp.toFixed(1)},${pts[i - 1].y.toFixed(1)} ${cp.toFixed(1)},${pts[i].y.toFixed(1)} ${pts[i].x.toFixed(1)},${pts[i].y.toFixed(1)}`;
-              }
-              el.setAttribute("d", d);
-            };
-            if (data[0]) drawPath("hg1", data[0]);
-            if (data[1]) drawPath("hg2", data[1]);
-          })
-          .catch(() => {});
+        this._hass.callApi("GET",
+          `history/period/${from}?filter_entity_id=${entities.join(",")}&minimal_response=true&no_attributes=true`
+        ).then(data => {
+          const drawPath = (id, arr) => {
+            const el = this.querySelector("#" + id);
+            if (!el || !arr || arr.length < 2) return;
+            const raw = arr.map(s => parseFloat(s.state)).filter(v => !isNaN(v));
+            if (raw.length < 2) return;
+            /* прореживаем до 80 точек */
+            const step = Math.max(1, Math.floor(raw.length / 80));
+            const vals = raw.filter((_, i) => i % step === 0);
+            const mn = Math.min(...vals), mx = Math.max(...vals), rng = mx - mn || 1;
+            const W = 400, H = 130, p = 14;
+            const pts = vals.map((v, i) => ({
+              x: p + (i / (vals.length - 1)) * (W - p * 2),
+              y: H - p - ((v - mn) / rng) * (H - p * 2),
+            }));
+            /* кривые Безье для сглаживания */
+            let d = `M${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)}`;
+            for (let i = 1; i < pts.length; i++) {
+              const cp = (pts[i-1].x + pts[i].x) / 2;
+              d += ` C${cp.toFixed(1)},${pts[i-1].y.toFixed(1)} ${cp.toFixed(1)},${pts[i].y.toFixed(1)} ${pts[i].x.toFixed(1)},${pts[i].y.toFixed(1)}`;
+            }
+            el.setAttribute("d", d);
+          };
+          if (data[0]) drawPath("hg1", data[0]);
+          if (data[1]) drawPath("hg2", data[1]);
+        }).catch(() => {});
       }
     }
 
     (c.buttons || []).forEach((b, i) => {
       const el = this.querySelector("#btn-" + i);
       if (!el || !b.entity) return;
-      const isPush =
-        b.button_type === "push" || (b.entity && b.entity.split(".")[0] === "button");
+      const isPush = b.button_type === "push" ||
+        (b.entity && b.entity.split(".")[0] === "button");
       const fire = () => {
         const needConfirm = b.confirm !== false;
         if (needConfirm) {
-          dlgText.textContent = this.t("dialog.confirm", {
-            name: b.name || b.entity,
-          });
+          dlgText.textContent = `Выполнить «${b.name || b.entity}»?`;
           this._pendingPush = isPush ? el : null;
           this._pending = b;
           dlg.classList.add("show");
@@ -1090,16 +942,18 @@ class NoemaPowerCard extends HTMLElement {
       });
     });
 
+    /* регуляторы: live-обновление при перетаскивании, запись по отпусканию */
     (c.controls || []).forEach((ct, i) => {
       const inp = this.querySelector("#ctl-" + i);
       if (!inp || !ct.entity) return;
       const paint = () => {
-        const min = Number(inp.min),
-          max = Number(inp.max);
+        const min = Number(inp.min), max = Number(inp.max);
         const p = max > min ? ((Number(inp.value) - min) / (max - min)) * 100 : 0;
         inp.style.setProperty("--p", p + "%");
         const v = this.querySelector("#ctlv-" + i);
-        if (v) v.textContent = Number(inp.value) + (ct.unit ? " " + ct.unit : "");
+        if (v)
+          v.textContent =
+            Number(inp.value) + (ct.unit ? " " + ct.unit : "");
       };
       inp.addEventListener("input", () => {
         this._ctlDrag = i;
@@ -1114,20 +968,23 @@ class NoemaPowerCard extends HTMLElement {
       });
     });
 
-    this.querySelector(".efc-wrap")?.addEventListener("click", (e) => {
-      const cell = e.target.closest("[data-entity]");
-      if (!cell) return;
-      const entityId = cell.dataset.entity;
-      if (!entityId) return;
-      if (e.target.closest(".efc-btns, .efc-ctls, .efc-confirm")) return;
-      this.dispatchEvent(
-        new CustomEvent("hass-more-info", {
-          detail: { entityId },
-          bubbles: true,
-          composed: true,
-        })
-      );
-    });
+    /* клики по сенсорам → more-info */
+    this.querySelector(".efc-wrap")
+      ?.addEventListener("click", (e) => {
+        const cell = e.target.closest("[data-entity]");
+        if (!cell) return;
+        const entityId = cell.dataset.entity;
+        if (!entityId) return;
+        /* не перехватывать клики по кнопкам и регуляторам */
+        if (e.target.closest(".efc-btns, .efc-ctls, .efc-confirm")) return;
+        this.dispatchEvent(
+          new CustomEvent("hass-more-info", {
+            detail: { entityId },
+            bubbles: true,
+            composed: true,
+          })
+        );
+      });
 
     this._built = true;
   }
@@ -1154,7 +1011,7 @@ class NoemaPowerCard extends HTMLElement {
       if (valEl) {
         valEl.textContent =
           v === null
-            ? this.t("status.no_data")
+            ? "нет данных"
             : v.toFixed(s.decimals ?? 0) + (s.unit ? " " + s.unit : "");
       }
       if (s.style === "liquid") {
@@ -1188,29 +1045,26 @@ class NoemaPowerCard extends HTMLElement {
               if (mode !== prev) {
                 fs.dataset.mode = mode;
                 fs.className = "efc-flowstatus " + (mode === "idle" ? "" : mode);
+                /* короткая вспышка при смене режима */
                 if (prev && mode !== "idle") {
                   fs.classList.add("switch");
                   setTimeout(() => fs.classList.remove("switch"), 750);
                 }
               }
               if (mode !== "idle") {
-                const green = "#4fc95b",
-                  blue = "#3b9df3";
+                const green = "#4fc95b", blue = "#3b9df3";
                 const cMain = mode === "charge" ? blue : green;
                 fs.style.setProperty("--fs-c", cMain);
                 fs.style.setProperty("--fs-cl", npcAlpha(cMain, 0.55));
                 this.querySelector("#fsi-x" + i).textContent =
                   mode === "charge" ? "⚡" : "🔋";
                 this.querySelector("#fsl-x" + i).textContent =
-                  mode === "charge"
-                    ? this.t("status.charging")
-                    : this.t("status.battery");
+                  mode === "charge" ? "Зарядка от сети" : "Работа от аккумулятора";
                 this.querySelector("#fsp-x" + i).textContent =
-                  Math.round(mode === "charge" ? fin : fout) +
-                  " " +
-                  this.t("status.watts");
+                  Math.round(mode === "charge" ? fin : fout) + " Вт";
               }
             }
+            /* диагностика: что видит шар */
             if (this._dbg !== `${fin}|${fout}|${charging}|${discharging}`) {
               this._dbg = `${fin}|${fout}|${charging}|${discharging}`;
               console.debug(
@@ -1238,11 +1092,16 @@ class NoemaPowerCard extends HTMLElement {
           segs[j].style.setProperty("--efc-seg", pal(j, n));
           segs[j].classList.toggle("on", j < fillCount);
         }
-        led.classList.toggle("anim", s.animate !== false && v !== null && v > min);
+        /* искра бежит, когда есть значение; галкой animate=false отключается */
+        led.classList.toggle(
+          "anim",
+          s.animate !== false && v !== null && v > min
+        );
         led.classList.toggle("rev", !!s.invert);
       }
     });
 
+    /* SVG-графики за hero-блоком: обновляем раз в 5 минут */
     if (c.graph_entity_1 || c.graph_entity_2) {
       const now = Date.now();
       if (!this._graphTs || now - this._graphTs > 300000) {
@@ -1250,54 +1109,49 @@ class NoemaPowerCard extends HTMLElement {
         const hours = c.graph_hours || 24;
         const from = new Date(now - hours * 3600000).toISOString();
         const entities = [c.graph_entity_1, c.graph_entity_2].filter(Boolean);
-        this._hass
-          .callApi(
-            "GET",
-            `history/period/${from}?filter_entity_id=${entities.join(",")}&minimal_response=true&no_attributes=true`
-          )
-          .then((data) => {
-            const drawPath = (id, arr) => {
-              const el = this.querySelector("#" + id);
-              if (!el || !arr || arr.length < 2) return;
-              const raw = arr.map((s) => parseFloat(s.state)).filter((v) => !isNaN(v));
-              if (raw.length < 2) return;
-              const step = Math.max(1, Math.floor(raw.length / 80));
-              const vals = raw.filter((_, i) => i % step === 0);
-              const mn = Math.min(...vals),
-                mx = Math.max(...vals),
-                rng = mx - mn || 1;
-              const W = 400,
-                H = 130,
-                p = 14;
-              const pts = vals.map((v, i) => ({
-                x: p + (i / (vals.length - 1)) * (W - p * 2),
-                y: H - p - ((v - mn) / rng) * (H - p * 2),
-              }));
-              let d = `M${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)}`;
-              for (let i = 1; i < pts.length; i++) {
-                const cp = (pts[i - 1].x + pts[i].x) / 2;
-                d += ` C${cp.toFixed(1)},${pts[i - 1].y.toFixed(1)} ${cp.toFixed(1)},${pts[i].y.toFixed(1)} ${pts[i].x.toFixed(1)},${pts[i].y.toFixed(1)}`;
-              }
-              el.setAttribute("d", d);
-            };
-            if (data[0]) drawPath("hg1", data[0]);
-            if (data[1]) drawPath("hg2", data[1]);
-          })
-          .catch(() => {});
+        this._hass.callApi("GET",
+          `history/period/${from}?filter_entity_id=${entities.join(",")}&minimal_response=true&no_attributes=true`
+        ).then(data => {
+          const drawPath = (id, arr) => {
+            const el = this.querySelector("#" + id);
+            if (!el || !arr || arr.length < 2) return;
+            const raw = arr.map(s => parseFloat(s.state)).filter(v => !isNaN(v));
+            if (raw.length < 2) return;
+            /* прореживаем до 80 точек */
+            const step = Math.max(1, Math.floor(raw.length / 80));
+            const vals = raw.filter((_, i) => i % step === 0);
+            const mn = Math.min(...vals), mx = Math.max(...vals), rng = mx - mn || 1;
+            const W = 400, H = 130, p = 14;
+            const pts = vals.map((v, i) => ({
+              x: p + (i / (vals.length - 1)) * (W - p * 2),
+              y: H - p - ((v - mn) / rng) * (H - p * 2),
+            }));
+            /* кривые Безье для сглаживания */
+            let d = `M${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)}`;
+            for (let i = 1; i < pts.length; i++) {
+              const cp = (pts[i-1].x + pts[i].x) / 2;
+              d += ` C${cp.toFixed(1)},${pts[i-1].y.toFixed(1)} ${cp.toFixed(1)},${pts[i].y.toFixed(1)} ${pts[i].x.toFixed(1)},${pts[i].y.toFixed(1)}`;
+            }
+            el.setAttribute("d", d);
+          };
+          if (data[0]) drawPath("hg1", data[0]);
+          if (data[1]) drawPath("hg2", data[1]);
+        }).catch(() => {});
       }
     }
 
     (c.buttons || []).forEach((b, i) => {
       const el = this.querySelector("#btn-" + i);
       if (!el || !b.entity) return;
-      const isPush =
-        b.button_type === "push" || (b.entity && b.entity.split(".")[0] === "button");
+      const isPush = b.button_type === "push" ||
+        (b.entity && b.entity.split(".")[0] === "button");
       if (!isPush) {
         const st = this._hass.states[b.entity];
         el.classList.toggle("on", !!st && st.state === "on");
       }
     });
 
+    /* регуляторы: подтягиваем состояние, кроме перетаскиваемого */
     (c.controls || []).forEach((ct, i) => {
       const inp = this.querySelector("#ctl-" + i);
       if (!inp || !ct.entity) return;
@@ -1310,12 +1164,12 @@ class NoemaPowerCard extends HTMLElement {
       if (this._ctlDrag !== i) {
         inp.value = parseFloat(st.state) || 0;
       }
-      const min = Number(inp.min),
-        max = Number(inp.max);
+      const min = Number(inp.min), max = Number(inp.max);
       const p = max > min ? ((Number(inp.value) - min) / (max - min)) * 100 : 0;
       inp.style.setProperty("--p", p + "%");
       const v = this.querySelector("#ctlv-" + i);
-      if (v) v.textContent = Number(inp.value) + (ct.unit ? " " + ct.unit : "");
+      if (v)
+        v.textContent = Number(inp.value) + (ct.unit ? " " + ct.unit : "");
     });
   }
 
@@ -1324,9 +1178,172 @@ class NoemaPowerCard extends HTMLElement {
   }
 }
 
-/* ------------------------------------------------------------------ */
-/*  Visual editor                                                       */
-/* ------------------------------------------------------------------ */
+/* ================= Визуальный редактор ================= */
+
+const NPC_MAIN_SCHEMA = [
+  { name: "title", selector: { text: {} } },
+  { name: "image", selector: { text: {} } },
+  { name: "graph_entity_1", selector: { entity: {} } },
+  { name: "graph_entity_2", selector: { entity: {} } },
+  { name: "graph_hours", selector: { number: { min: 1, max: 72, step: 1, mode: "box" } } },
+  {
+    name: "background",
+    selector: {
+      select: {
+        mode: "dropdown",
+        options: [
+          { value: "transparent", label: "Прозрачный (по умолчанию)" },
+          { value: "color", label: "Свой цвет" },
+        ],
+      },
+    },
+  },
+  { name: "background_color", selector: { color_rgb: {} } },
+];
+
+const NPC_SENSOR_SCHEMA = [
+  { name: "entity", required: true, selector: { entity: {} } },
+  { name: "name", selector: { text: {} } },
+  {
+    name: "unit",
+    selector: {
+      select: {
+        mode: "dropdown",
+        custom_value: true,
+        options: [
+          { value: "%", label: "%" },
+          { value: "Вт", label: "Вт" },
+          { value: "кВт", label: "кВт" },
+          { value: "Вт·ч", label: "Вт·ч" },
+          { value: "кВт·ч", label: "кВт·ч" },
+          { value: "В", label: "В" },
+          { value: "А", label: "А" },
+          { value: "°C", label: "°C" },
+          { value: "ч", label: "ч" },
+          { value: "мин", label: "мин" },
+          { value: "Гц", label: "Гц" },
+          { value: "ppm", label: "ppm" },
+          { value: "мкг/м³", label: "мкг/м³" },
+          { value: "лк", label: "лк" },
+          { value: "дБ", label: "дБ" },
+        ],
+      },
+    },
+  },
+  {
+    name: "color",
+    selector: {
+      select: {
+        mode: "dropdown",
+        options: [
+          { value: "level", label: "Градиент красный→зелёный" },
+          { value: "heat", label: "Градиент зелёный→красный" },
+          { value: "good", label: "Зелёный" },
+          { value: "warn", label: "Жёлтый" },
+          { value: "bad", label: "Красный" },
+          { value: "info", label: "Синий" },
+        ],
+      },
+    },
+  },
+  { name: "min", selector: { number: { mode: "box", step: 0.1 } } },
+  { name: "max", selector: { number: { mode: "box", step: 0.1 } } },
+  { name: "decimals", selector: { number: { min: 0, max: 3, mode: "box" } } },
+  { name: "flow_in", selector: { entity: { domain: "sensor" } } },
+  { name: "flow_out", selector: { entity: { domain: "sensor" } } },
+  {
+    name: "style",
+    selector: {
+      select: {
+        mode: "dropdown",
+        options: [
+          { value: "bar", label: "Полоса (LED-сегменты)" },
+          { value: "liquid", label: "Жидкость (бак с волнами)" },
+        ],
+      },
+    },
+  },
+  { name: "wide", selector: { boolean: {} } },
+  { name: "invert", selector: { boolean: {} } },
+  { name: "animate", selector: { boolean: {} } },
+];
+
+const NPC_CONTROL_SCHEMA = [
+  {
+    name: "entity",
+    required: true,
+    selector: { entity: { domain: ["number", "input_number"] } },
+  },
+  { name: "name", selector: { text: {} } },
+  { name: "unit", selector: { text: {} } },
+  { name: "min", selector: { number: { mode: "box", step: 1 } } },
+  { name: "max", selector: { number: { mode: "box", step: 1 } } },
+  { name: "step", selector: { number: { mode: "box", step: 0.1 } } },
+];
+
+const NPC_BUTTON_SCHEMA = [
+  {
+    name: "entity",
+    required: true,
+    selector: { entity: { domain: ["switch", "button", "script", "input_boolean"] } },
+  },
+  { name: "name", selector: { text: {} } },
+  {
+    name: "btn_color",
+    selector: {
+      select: {
+        mode: "dropdown",
+        options: [
+          { value: "cyan", label: "Голубой (по умолчанию)" },
+          { value: "red", label: "Красный (опасное действие)" },
+          { value: "yellow", label: "Жёлтый (осторожно)" },
+          { value: "green", label: "Зелёный (безопасное)" },
+          { value: "blue", label: "Синий (информация)" },
+        ],
+      },
+    },
+  },
+  {
+    name: "button_type",
+    selector: {
+      select: {
+        mode: "dropdown",
+        options: [
+          { value: "toggle", label: "Тумблер (switch)" },
+          { value: "push", label: "Кнопка (button)" },
+        ],
+      },
+    },
+  },
+  { name: "confirm", selector: { boolean: {} } },
+];
+
+const NPC_LABELS = {
+  background: "Фон карточки",
+  background_color: "Цвет фона (для режима «Свой цвет»)",
+  title: "Название карточки",
+  image: "Картинка (/local/...)",
+  graph_entity_1: "График 1 за hero-блоком",
+  graph_entity_2: "График 2 за hero-блоком",
+  graph_hours: "Период, часов",
+  entity: "Сущность",
+  name: "Название",
+  unit: "Единица измерения",
+  color: "Цвет полосы",
+  min: "Минимум шкалы",
+  max: "Максимум шкалы",
+  decimals: "Знаков после запятой",
+  flow_in: "Сенсор входа, Вт (для пульса шара)",
+  flow_out: "Сенсор выхода, Вт (для пульса шара)",
+  style: "Вид отображения",
+  wide: "На всю ширину (одна колонка)",
+  invert: "Инверсия: градиент и направление искры",
+  animate: "Бегущая искра при активности (по умолчанию вкл)",
+  btn_color: "Цвет кнопки",
+  button_type: "Тип: Тумблер или Кнопка",
+  confirm: "Спрашивать подтверждение",
+  step: "Шаг регулятора",
+};
 
 class NoemaPowerCardEditor extends HTMLElement {
   setConfig(config) {
@@ -1339,6 +1356,9 @@ class NoemaPowerCardEditor extends HTMLElement {
       buttons: [...(config.buttons || [])],
       controls: [...(config.controls || [])],
     };
+    /* Наши собственные изменения (флаг _selfUpdate) не требуют пересборки —
+       так сохраняется фокус ввода. Внешние изменения (YAML-редактор, undo)
+       ОБЯЗАНЫ пересобрать DOM, иначе индексы кнопок бьют мимо элементов. */
     if (this._selfUpdate) {
       this._selfUpdate = false;
       return;
@@ -1350,10 +1370,6 @@ class NoemaPowerCardEditor extends HTMLElement {
   set hass(hass) {
     this._hass = hass;
     this.querySelectorAll("ha-form").forEach((f) => (f.hass = hass));
-  }
-
-  t(key, vars) {
-    return npcT(this._hass, key, vars);
   }
 
   _fire() {
@@ -1375,7 +1391,7 @@ class NoemaPowerCardEditor extends HTMLElement {
     const f = document.createElement("ha-form");
     f.schema = schema;
     f.data = data;
-    f.computeLabel = (s) => this.t("editor." + s.name) || s.name;
+    f.computeLabel = (s) => NPC_LABELS[s.name] || s.name;
     if (this._hass) f.hass = this._hass;
     f.addEventListener("value-changed", (ev) => {
       ev.stopPropagation();
@@ -1388,8 +1404,7 @@ class NoemaPowerCardEditor extends HTMLElement {
 
   _mkSection(titleText) {
     const d = document.createElement("h3");
-    d.style.cssText =
-      "margin:16px 0 4px;font-size:13px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;opacity:.7;";
+    d.style.cssText = "margin:16px 0 4px;font-size:13px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;opacity:.7;";
     d.textContent = titleText;
     return d;
   }
@@ -1408,10 +1423,7 @@ class NoemaPowerCardEditor extends HTMLElement {
   _mkBtn(label, onClick) {
     const b = document.createElement("mwc-button");
     b.textContent = label;
-    b.addEventListener("click", (e) => {
-      e.stopPropagation();
-      onClick();
-    });
+    b.addEventListener("click", (e) => { e.stopPropagation(); onClick(); });
     return b;
   }
 
@@ -1420,10 +1432,7 @@ class NoemaPowerCardEditor extends HTMLElement {
     b.setAttribute("outlined", "");
     b.style.cssText = "margin-top:4px;";
     b.textContent = label;
-    b.addEventListener("click", (e) => {
-      e.stopPropagation();
-      onClick();
-    });
+    b.addEventListener("click", (e) => { e.stopPropagation(); onClick(); });
     return b;
   }
 
@@ -1431,165 +1440,18 @@ class NoemaPowerCardEditor extends HTMLElement {
     return item.name || item.entity || fallback;
   }
 
-  _getSchemas() {
-    const t = (k) => this.t(k);
-    return {
-      main: [
-        { name: "title", selector: { text: {} } },
-        { name: "image", selector: { text: {} } },
-        { name: "graph_entity_1", selector: { entity: {} } },
-        { name: "graph_entity_2", selector: { entity: {} } },
-        {
-          name: "graph_hours",
-          selector: { number: { min: 1, max: 72, step: 1, mode: "box" } },
-        },
-        {
-          name: "background",
-          selector: {
-            select: {
-              mode: "dropdown",
-              options: [
-                { value: "transparent", label: t("editor.background_transparent") },
-                { value: "color", label: t("editor.background_color_option") },
-              ],
-            },
-          },
-        },
-        { name: "background_color", selector: { color_rgb: {} } },
-      ],
-      sensor: [
-        { name: "entity", required: true, selector: { entity: {} } },
-        { name: "name", selector: { text: {} } },
-        {
-          name: "unit",
-          selector: {
-            select: {
-              mode: "dropdown",
-              custom_value: true,
-              options: [
-                { value: "%", label: "%" },
-                { value: "W", label: "W" },
-                { value: "kW", label: "kW" },
-                { value: "Wh", label: "Wh" },
-                { value: "kWh", label: "kWh" },
-                { value: "V", label: "V" },
-                { value: "A", label: "A" },
-                { value: "°C", label: "°C" },
-                { value: "h", label: "h" },
-                { value: "min", label: "min" },
-                { value: "Hz", label: "Hz" },
-                { value: "ppm", label: "ppm" },
-                { value: "µg/m³", label: "µg/m³" },
-                { value: "lx", label: "lx" },
-                { value: "dB", label: "dB" },
-              ],
-            },
-          },
-        },
-        {
-          name: "color",
-          selector: {
-            select: {
-              mode: "dropdown",
-              options: [
-                { value: "level", label: t("editor.color_level") },
-                { value: "heat", label: t("editor.color_heat") },
-                { value: "good", label: t("editor.color_good") },
-                { value: "warn", label: t("editor.color_warn") },
-                { value: "bad", label: t("editor.color_bad") },
-                { value: "info", label: t("editor.color_info") },
-              ],
-            },
-          },
-        },
-        { name: "min", selector: { number: { mode: "box", step: 0.1 } } },
-        { name: "max", selector: { number: { mode: "box", step: 0.1 } } },
-        { name: "decimals", selector: { number: { min: 0, max: 3, mode: "box" } } },
-        { name: "flow_in", selector: { entity: { domain: "sensor" } } },
-        { name: "flow_out", selector: { entity: { domain: "sensor" } } },
-        {
-          name: "style",
-          selector: {
-            select: {
-              mode: "dropdown",
-              options: [
-                { value: "bar", label: t("editor.style_bar") },
-                { value: "liquid", label: t("editor.style_liquid") },
-              ],
-            },
-          },
-        },
-        { name: "wide", selector: { boolean: {} } },
-        { name: "invert", selector: { boolean: {} } },
-        { name: "animate", selector: { boolean: {} } },
-      ],
-      control: [
-        {
-          name: "entity",
-          required: true,
-          selector: { entity: { domain: ["number", "input_number"] } },
-        },
-        { name: "name", selector: { text: {} } },
-        { name: "unit", selector: { text: {} } },
-        { name: "min", selector: { number: { mode: "box", step: 1 } } },
-        { name: "max", selector: { number: { mode: "box", step: 1 } } },
-        { name: "step", selector: { number: { mode: "box", step: 0.1 } } },
-      ],
-      button: [
-        {
-          name: "entity",
-          required: true,
-          selector: {
-            entity: { domain: ["switch", "button", "script", "input_boolean"] },
-          },
-        },
-        { name: "name", selector: { text: {} } },
-        {
-          name: "btn_color",
-          selector: {
-            select: {
-              mode: "dropdown",
-              options: [
-                { value: "cyan", label: t("editor.btn_color_cyan") },
-                { value: "red", label: t("editor.btn_color_red") },
-                { value: "yellow", label: t("editor.btn_color_yellow") },
-                { value: "green", label: t("editor.btn_color_green") },
-                { value: "blue", label: t("editor.btn_color_blue") },
-              ],
-            },
-          },
-        },
-        {
-          name: "button_type",
-          selector: {
-            select: {
-              mode: "dropdown",
-              options: [
-                { value: "toggle", label: t("editor.button_type_toggle") },
-                { value: "push", label: t("editor.button_type_push") },
-              ],
-            },
-          },
-        },
-        { name: "confirm", selector: { boolean: {} } },
-      ],
-      divider: [{ name: "name", selector: { text: {} } }],
-    };
-  }
-
   _render() {
     this.innerHTML = "";
-    const schemas = this._getSchemas();
-    const t = (k, v) => this.t(k, v);
 
     this.appendChild(
-      this._mkForm(schemas.main, this._config, (v) => {
+      this._mkForm(NPC_MAIN_SCHEMA, this._config, (v) => {
         Object.assign(this._config, v);
       })
     );
 
-    this.appendChild(this._mkSection(t("editor.sensors")));
+    this.appendChild(this._mkSection("Сенсоры"));
 
+    const DIVIDER_SCHEMA = [{ name: "name", selector: { text: {} } }];
     const move = (arr, i, dir) => {
       const j = i + dir;
       if (j < 0 || j >= arr.length) return;
@@ -1603,28 +1465,24 @@ class NoemaPowerCardEditor extends HTMLElement {
       const isDiv = s.type === "divider";
       const { det, sum, body } = this._mkItemBox(
         isDiv
-          ? s.name
-            ? t("editor.divider_named", { name: s.name })
-            : t("editor.divider")
-          : this._itemSummary(s, t("editor.sensor") + " " + (i + 1)),
-        this._openIdx === "s" + i
+          ? (s.name || "Разделитель")
+          : this._itemSummary(s, "Сенсор " + (i + 1)),
+        this._openIdx === "s" + i,
       );
       body.appendChild(
-        this._mkForm(isDiv ? schemas.divider : schemas.sensor, s, (v) => {
+        this._mkForm(isDiv ? DIVIDER_SCHEMA : NPC_SENSOR_SCHEMA, s, (v) => {
           this._config.sensors[i] = isDiv ? { type: "divider", ...v } : v;
           sum.textContent = isDiv
-            ? v.name
-              ? t("editor.divider_named", { name: v.name })
-              : t("editor.divider")
-            : this._itemSummary(v, t("editor.sensor") + " " + (i + 1));
+            ? "— Разделитель" + (v.name ? ": " + v.name : "")
+            : this._itemSummary(v, "Сенсор " + (i + 1));
         })
       );
       const row = document.createElement("div");
-      row.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;padding-top:8px;";
-      row.appendChild(this._mkBtn(t("editor.move_up"), () => move(this._config.sensors, i, -1)));
-      row.appendChild(this._mkBtn(t("editor.move_down"), () => move(this._config.sensors, i, 1)));
+      row.style.cssText="display:flex;gap:8px;flex-wrap:wrap;padding-top:8px;";
+      row.appendChild(this._mkBtn("↑", () => move(this._config.sensors, i, -1)));
+      row.appendChild(this._mkBtn("↓", () => move(this._config.sensors, i, 1)));
       row.appendChild(
-        this._mkBtn(t("editor.delete"), () => {
+        this._mkBtn("✕ Удалить", () => {
           this._config.sensors.splice(i, 1);
           this._openIdx = null;
           this._render();
@@ -1634,11 +1492,10 @@ class NoemaPowerCardEditor extends HTMLElement {
       body.appendChild(row);
       this.appendChild(det);
     });
-
     const addRow = document.createElement("div");
-    addRow.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;";
+    addRow.style.cssText="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;";
     addRow.appendChild(
-      this._mkAddBtn(t("editor.add_sensor"), () => {
+      this._mkAddBtn("＋ Добавить сенсор", () => {
         this._config.sensors.push({
           entity: "",
           color: "level",
@@ -1650,7 +1507,7 @@ class NoemaPowerCardEditor extends HTMLElement {
       })
     );
     addRow.appendChild(
-      this._mkAddBtn(t("editor.add_divider"), () => {
+      this._mkAddBtn("＋ Разделитель", () => {
         this._config.sensors.push({ type: "divider", name: "" });
         this._openIdx = "s" + (this._config.sensors.length - 1);
         this._render();
@@ -1659,24 +1516,25 @@ class NoemaPowerCardEditor extends HTMLElement {
     );
     this.appendChild(addRow);
 
-    this.appendChild(this._mkSection(t("editor.buttons")));
+    this.appendChild(this._mkSection("Кнопки"));
     this._config.buttons.forEach((b, i) => {
       const { det, sum, body } = this._mkItemBox(
-        this._itemSummary(b, t("editor.button") + " " + (i + 1)),
-        this._openIdx === "b" + i
+        this._itemSummary(b, "Кнопка " + (i + 1)),
+        this._openIdx === "b" + i,
+        "⚡"
       );
       body.appendChild(
-        this._mkForm(schemas.button, b, (v) => {
+        this._mkForm(NPC_BUTTON_SCHEMA, b, (v) => {
           this._config.buttons[i] = v;
-          sum.textContent = this._itemSummary(v, t("editor.button") + " " + (i + 1));
+          sum.textContent = this._itemSummary(v, "Кнопка " + (i + 1));
         })
       );
       const brow = document.createElement("div");
-      brow.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;padding-top:8px;";
-      brow.appendChild(this._mkBtn(t("editor.move_up"), () => move(this._config.buttons, i, -1)));
-      brow.appendChild(this._mkBtn(t("editor.move_down"), () => move(this._config.buttons, i, 1)));
+      brow.style.cssText="display:flex;gap:8px;flex-wrap:wrap;padding-top:8px;";
+      brow.appendChild(this._mkBtn("↑", () => move(this._config.buttons, i, -1)));
+      brow.appendChild(this._mkBtn("↓", () => move(this._config.buttons, i, 1)));
       brow.appendChild(
-        this._mkBtn(t("editor.delete"), () => {
+        this._mkBtn("✕ Удалить", () => {
           this._config.buttons.splice(i, 1);
           this._openIdx = null;
           this._render();
@@ -1687,31 +1545,33 @@ class NoemaPowerCardEditor extends HTMLElement {
       this.appendChild(det);
     });
     this.appendChild(
-      this._mkAddBtn(t("editor.add_button"), () => {
+      this._mkAddBtn("＋ Добавить кнопку", () => {
         this._config.buttons.push({ entity: "", confirm: true });
         this._openIdx = "b" + (this._config.buttons.length - 1);
         this._render();
       })
     );
 
-    this.appendChild(this._mkSection(t("editor.controls")));
+    /* регуляторы */
+    this.appendChild(this._mkSection("Регуляторы"));
     this._config.controls.forEach((ct, i) => {
       const { det, sum, body } = this._mkItemBox(
-        this._itemSummary(ct, t("editor.control") + " " + (i + 1)),
-        this._openIdx === "c" + i
+        this._itemSummary(ct, "Регулятор " + (i + 1)),
+        this._openIdx === "c" + i,
+        "🎚"
       );
       body.appendChild(
-        this._mkForm(schemas.control, ct, (v) => {
+        this._mkForm(NPC_CONTROL_SCHEMA, ct, (v) => {
           this._config.controls[i] = v;
-          sum.textContent = this._itemSummary(v, t("editor.control") + " " + (i + 1));
+          sum.textContent = this._itemSummary(v, "Регулятор " + (i + 1));
         })
       );
       const crow = document.createElement("div");
-      crow.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;padding-top:8px;";
-      crow.appendChild(this._mkBtn(t("editor.move_up"), () => move(this._config.controls, i, -1)));
-      crow.appendChild(this._mkBtn(t("editor.move_down"), () => move(this._config.controls, i, 1)));
+      crow.style.cssText="display:flex;gap:8px;flex-wrap:wrap;padding-top:8px;";
+      crow.appendChild(this._mkBtn("↑", () => move(this._config.controls, i, -1)));
+      crow.appendChild(this._mkBtn("↓", () => move(this._config.controls, i, 1)));
       crow.appendChild(
-        this._mkBtn(t("editor.delete"), () => {
+        this._mkBtn("✕ Удалить", () => {
           this._config.controls.splice(i, 1);
           this._openIdx = null;
           this._render();
@@ -1722,7 +1582,7 @@ class NoemaPowerCardEditor extends HTMLElement {
       this.appendChild(det);
     });
     this.appendChild(
-      this._mkAddBtn(t("editor.add_control"), () => {
+      this._mkAddBtn("＋ Добавить регулятор", () => {
         this._config.controls.push({ entity: "" });
         this._openIdx = "c" + (this._config.controls.length - 1);
         this._render();
@@ -1738,7 +1598,7 @@ window.customCards = window.customCards || [];
 window.customCards.push({
   type: "noema-power-card",
   name: "Noema Power Card",
-  description: NPC_TRANSLATIONS.en["card.description"],
+  description: "Конструктор: LED-бары и кнопки для любых устройств",
   preview: true,
   documentationURL: "https://github.com/e2ret/noema-power-card",
 });
