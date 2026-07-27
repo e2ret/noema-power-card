@@ -1,7 +1,7 @@
 # ⚡ Noema Power Card
 
 <p align="left">
-  <img src="01.png" width="300" alt="Noema Power Card">
+  <img src="https://raw.githubusercontent.com/e2ret/noema-power-card/main/01.png" width="300" alt="Noema Power Card">
 </p>
 
 🇺🇸 [English](README.md) • 🇷🇺 [Русский](README_RU.md)
